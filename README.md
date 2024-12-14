@@ -50,3 +50,7 @@ Before running the application, make sure you have the following installed:
    ```bash
    git clone https://github.com/your-username/realtime-chat-app.git
    cd realtime-chat-app
+
+![image](https://github.com/user-attachments/assets/0900319a-89d5-40e1-b939-52c380d249c8)
+![image](https://github.com/user-attachments/assets/a1c27017-5672-4f90-a5fb-8ca5d5449952)
+
