@@ -1,5 +1,6 @@
 # Realtime Chat App
 
+https://fullstack-chat-app-xhc7.onrender.com/
 A realtime chat application built with Node.js, Express, and WebSocket (Socket.io) for real-time messaging. This app allows users to join chat rooms and send messages instantly to other users connected to the same room.
 
 ---
