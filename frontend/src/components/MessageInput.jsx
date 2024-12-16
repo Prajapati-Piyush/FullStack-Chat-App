@@ -3,44 +3,58 @@ import { useChatStore } from "../store/useChatStore";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB file size limit
+
 const MessageInput = () => {
   const [text, setText] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null); // Image or Video
+  const [mediaType, setMediaType] = useState(null); // 'image' or 'video'
   const fileInputRef = useRef(null);
   const { sendMessage } = useChatStore();
 
-  const handleImageChange = (e) => {
+  const handleMediaChange = (e) => {
     const file = e.target.files[0];
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+    if (!(file.type.startsWith("image/") || file.type.startsWith("video/"))) {
+      toast.error("Please select an image or video file");
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds 20MB");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result);
+      setMediaPreview(reader.result);
+      console.log(setMediaPreview)
+      setMediaType(file.type.startsWith("image/") ? "image" : "video");
+      console.log(mediaType)
     };
     reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
-    setImagePreview(null);
+  const removeMedia = () => {
+    setMediaPreview(null);
+    setMediaType(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imagePreview) return;
+    if (!text.trim() && !mediaPreview) return;
 
     try {
       await sendMessage({
         text: text.trim(),
-        image: imagePreview,
+        media: mediaPreview,
+        mediaType, // Send the media type (image or video)
       });
 
       // Clear form
       setText("");
-      setImagePreview(null);
+      setMediaPreview(null);
+      setMediaType(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -49,18 +63,26 @@ const MessageInput = () => {
 
   return (
     <div className="p-4 w-full">
-      {imagePreview && (
+      {mediaPreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
-            />
+            {mediaType === "image" ? (
+              <img
+                src={mediaPreview}
+                alt="Preview"
+                className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+              />
+            ) : (
+              <video
+                src={mediaPreview}
+                alt="Video Preview"
+                className="w-60 h-60 object-cover rounded-lg border border-zinc-700"
+                controls
+              />
+            )}
             <button
-              onClick={removeImage}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center"
+              onClick={removeMedia}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
               type="button"
             >
               <X className="size-3" />
@@ -80,16 +102,15 @@ const MessageInput = () => {
           />
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             className="hidden"
             ref={fileInputRef}
-            onChange={handleImageChange}
+            onChange={handleMediaChange}
           />
 
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle
-                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+            className={`hidden sm:flex btn btn-circle ${mediaPreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
@@ -98,7 +119,7 @@ const MessageInput = () => {
         <button
           type="submit"
           className="btn btn-sm btn-circle"
-          disabled={!text.trim() && !imagePreview}
+          disabled={!text.trim() && !mediaPreview}
         >
           <Send size={22} />
         </button>
@@ -106,4 +127,5 @@ const MessageInput = () => {
     </div>
   );
 };
+
 export default MessageInput;
