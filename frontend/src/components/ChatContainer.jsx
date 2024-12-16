@@ -56,8 +56,8 @@ const ChatContainer = () => {
                                 <img
                                     src={
                                         message.senderId === authUser._id
-                                            ? authUser.profilePic || "/avatar.png"
-                                            : selectedUser.profilePic || "/avatar.png"
+                                            ? authUser.profilPic || "/avatar.png"
+                                            : selectedUser.profilPic || "/avatar.png"
                                     }
                                     alt="profile pic"
                                 />
@@ -69,11 +69,22 @@ const ChatContainer = () => {
                             </time>
                         </div>
                         <div className="chat-bubble flex flex-col">
-                            {message.image && (
+
+                            {message.mediaType === "image" && message.mediaUrl && (
                                 <img
-                                    src={message.image}
+                                    src={message.mediaUrl}
                                     alt="Attachment"
                                     className="sm:max-w-[200px] rounded-md mb-2"
+                                />
+                            )}
+
+                            {message.mediaType === "video" && message.mediaUrl && (
+                                <video
+                                    src={message.mediaUrl}
+                                    alt="Attachment"
+                                    className='sm:max-w-[200px] rounded-sm mb-2'
+                                    controls
+                                    playsInline
                                 />
                             )}
                             {message.text && <p>{message.text}</p>}
